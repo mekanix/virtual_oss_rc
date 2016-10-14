@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# PROVIDE: virtual_oss
+# KEYWORD: nojail shutdown
+
+. /etc/rc.subr
+
+name=virtual_oss
+rcvar=virtual_oss_enable
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+
+load_rc_config $name
+virtual_oss_enable=${virtual_oss_enable-"NO"}
+pidfile=${virtual_oss_pidfile-"/var/run/virtual_oss.pid"}
+virtual_oss_args=${virtual_oss_args-"-i 8 -C 18 -c 18 -r 48000 -b 32 -s 1536 -f /dev/dsp0 -c 2 -d dsp -c 18 -d vdsp.jack -t vdsp.ctl"}
+
+virtual_oss_start() {
+    /usr/local/sbin/virtual_oss ${virtual_oss_args} &
+    echo $! >${pidfile}
+}
+
+virtual_oss_stop() {
+    pid=`cat ${pidfile}`
+    kill ${pid}
+    rm -rf ${pidfile}
+}
+
+run_rc_command "$1"
